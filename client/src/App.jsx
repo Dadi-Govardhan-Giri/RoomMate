@@ -38,4 +38,5 @@ export default function App() {
   }
 
   return <Home user={user} onLogout={handleLogout} />;
+
 }

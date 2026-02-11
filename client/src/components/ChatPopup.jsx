@@ -17,13 +17,11 @@ export default function ChatPopup({ room, onClose }) {
   return (
     <div className="chatOverlay">
       <div className="chatBox">
-        {/* Header */}
         <div className="chatHeader">
-          <h3>Chat with {room.city} Owner</h3>
+          <h3>{room.city} Owner</h3>
           <button onClick={onClose}>✖</button>
         </div>
 
-        {/* Messages */}
         <div className="chatMessages">
           {messages.map((msg, i) => (
             <p key={i} className={msg.sender === "me" ? "myMsg" : "userMsg"}>
@@ -32,7 +30,6 @@ export default function ChatPopup({ room, onClose }) {
           ))}
         </div>
 
-        {/* Input */}
         <div className="chatInput">
           <input
             placeholder="Type message..."
