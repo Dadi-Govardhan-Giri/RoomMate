@@ -1,15 +1,22 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
+
 require("dotenv").config();
 
 const roomRoutes = require("./routes/rooms");
 
 const app = express();
 
-// Middleware
+// Middlewareaaaaaa
 app.use(cors());
 app.use(express.json());
+
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);
+
+
 
 // Test route
 app.get("/", (req, res) => {

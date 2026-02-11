@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
 import ChatPopup from "../components/ChatPopup";
+import Navbar from "../components/Navbar";
 
-export default function Home({ user }) {
+export default function Home({ user, onLogout }) {
   const [rooms, setRooms] = useState([]);
   const [search, setSearch] = useState("");
   const [genderFilter, setGenderFilter] = useState("All");
@@ -25,7 +25,7 @@ export default function Home({ user }) {
 
   return (
     <div>
-      <Navbar user={user} />
+      <Navbar user={user} onLogout={onLogout} />
 
       {/* Hero Section */}
       <div className="hero">
@@ -72,10 +72,7 @@ export default function Home({ user }) {
                 ))}
               </div>
 
-              <button
-                className="chatBtn"
-                onClick={() => setActiveRoom(room)}
-              >
+              <button className="chatBtn" onClick={() => setActiveRoom(room)}>
                 💬 Chat Now
               </button>
             </div>
