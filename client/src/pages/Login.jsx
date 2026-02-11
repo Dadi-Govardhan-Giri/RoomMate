@@ -1,7 +1,17 @@
 import { useState } from "react";
+import axios from "axios";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
+
+  async function handleLogin() {
+    const res = await axios.post("http://localhost:4000/api/auth/login", {
+      email,
+    });
+
+    localStorage.setItem("token", res.data.token);
+    onLogin(res.data.user);
+  }
 
   return (
     <div className="authPage">
@@ -14,7 +24,7 @@ export default function Login({ onLogin }) {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <button onClick={() => onLogin(email)}>Login</button>
+        <button onClick={handleLogin}>Login</button>
       </div>
     </div>
   );
