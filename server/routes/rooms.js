@@ -1,15 +1,13 @@
 const express = require("express");
 const Room = require("../models/Room");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  try {
-    const rooms = await Room.find();
-    res.json(rooms);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Protected Rooms Route
+router.get("/", authMiddleware, async (req, res) => {
+  const rooms = await Room.find();
+  res.json(rooms);
 });
 
 module.exports = router;
