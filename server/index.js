@@ -1,14 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
+const dotenv = require("dotenv");
 
-const http = require("http");
-const { Server } = require("socket.io");
+dotenv.config();
 
-const roomsRoutes = require("./routes/rooms");
-const authRoutes = require("./routes/auth");
-
+// ✅ Create app FIRST
 const app = express();
 
 // Middleware
@@ -16,15 +13,34 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/rooms", roomsRoutes);
-app.use("/api/auth", authRoutes);
+const roomRoutes = require("./routes/rooms");
+const authRoutes = require("./routes/auth");
+const chatRoutes = require("./routes/chat");
 
-// Socket Server
-const server = http.createServer(app);
+// Use Routes AFTER app created
+app.use("/api/rooms", roomRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
+
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected ✅"))
+  .catch((err) => console.log(err));
+
+// Server Start
+const PORT = process.env.PORT || 4000;
+
+const server = app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT} 🚀`)
+);
+
+// Socket.io Setup
+const { Server } = require("socket.io");
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
   },
 });
 
@@ -33,6 +49,7 @@ io.on("connection", (socket) => {
 
   socket.on("join_group", (roomId) => {
     socket.join(roomId);
+    console.log("Joined Group Room:", roomId);
   });
 
   socket.on("send_group", ({ roomId, message }) => {
@@ -40,16 +57,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User Disconnected");
+    console.log("User Disconnected:", socket.id);
   });
-});
-
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch((err) => console.log(err));
-
-server.listen(4000, () => {
-  console.log("Server running on port 4000 🚀");
 });

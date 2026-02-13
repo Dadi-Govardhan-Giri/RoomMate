@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import AddRoom from "./pages/AddRoom";
+<Route path="/add-room" element={<AddRoom />} />
+
 
 export default function App() {
   const [user, setUser] = useState(null);

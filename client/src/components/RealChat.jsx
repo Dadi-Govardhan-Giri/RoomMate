@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -7,33 +8,33 @@ export default function RealChat({ room, user, mode, onClose }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
-  // Join chat room
+  // Load old messages from MongoDB
   useEffect(() => {
-    if (mode === "private") {
-      const privateKey = `${room._id}_${user._id}`;
-      socket.emit("join_private", { roomId: room._id, userId: user._id });
+    const token = localStorage.getItem("token");
 
-      socket.on("receive_private", (msg) => {
-        setMessages((prev) => [...prev, msg]);
-      });
+    axios
+      .get(`http://localhost:4000/api/chat/${room._id}/${mode}`, {
+        headers: { Authorization: token },
+      })
+      .then((res) => setMessages(res.data));
+  }, [room, mode]);
 
-      return () => socket.off("receive_private");
-    }
+  // Join socket room
+  useEffect(() => {
+    socket.emit("join_group", room._id);
 
-    if (mode === "group") {
-      socket.emit("join_group", room._id);
+    socket.on("receive_group", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
 
-      socket.on("receive_group", (msg) => {
-        setMessages((prev) => [...prev, msg]);
-      });
+    return () => socket.off("receive_group");
+  }, [room]);
 
-      return () => socket.off("receive_group");
-    }
-  }, [room, user, mode]);
-
-  // Send Message
-  function sendMessage() {
+  // Send message
+  async function sendMessage() {
     if (!text.trim()) return;
+
+    const token = localStorage.getItem("token");
 
     const msgData = {
       sender: user.name,
@@ -41,20 +42,23 @@ export default function RealChat({ room, user, mode, onClose }) {
       time: new Date().toLocaleTimeString(),
     };
 
-    if (mode === "private") {
-      const privateKey = `${room._id}_${user._id}`;
-      socket.emit("send_private", {
-        roomKey: privateKey,
-        message: msgData,
-      });
-    }
-
-    if (mode === "group") {
-      socket.emit("send_group", {
+    // Save in DB
+    await axios.post(
+      "http://localhost:4000/api/chat",
+      {
         roomId: room._id,
-        message: msgData,
-      });
-    }
+        type: mode,
+        text,
+        senderName: user.name,
+      },
+      { headers: { Authorization: token } }
+    );
+
+    // Send live
+    socket.emit("send_group", {
+      roomId: room._id,
+      message: msgData,
+    });
 
     setText("");
   }
@@ -64,7 +68,7 @@ export default function RealChat({ room, user, mode, onClose }) {
       <div className="chatBox">
         <div className="chatHeader">
           <h3>
-            {mode === "private" ? "Private Chat" : "Group Chat"} - {room.city}
+            {mode.toUpperCase()} Chat - {room.city}
           </h3>
           <button onClick={onClose}>✖</button>
         </div>
@@ -72,17 +76,15 @@ export default function RealChat({ room, user, mode, onClose }) {
         <div className="chatMessages">
           {messages.map((m, i) => (
             <p key={i} className="userMsg">
-              <b>{m.sender}</b>: {m.text}
-              <br />
-              <small>{m.time}</small>
+              <b>{m.senderName || m.sender}</b>: {m.text}
             </p>
           ))}
         </div>
 
         <div className="chatInput">
           <input
-            placeholder="Type message..."
             value={text}
+            placeholder="Type message..."
             onChange={(e) => setText(e.target.value)}
           />
           <button onClick={sendMessage}>Send</button>

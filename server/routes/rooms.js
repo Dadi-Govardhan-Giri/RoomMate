@@ -10,4 +10,11 @@ router.get("/", authMiddleware, async (req, res) => {
   res.json(rooms);
 });
 
+router.post("/add", async (req, res) => {
+  const newRoom = new Room(req.body);
+  await newRoom.save();
+  res.json({ message: "Room Added ✅" });
+});
+
+
 module.exports = router;
