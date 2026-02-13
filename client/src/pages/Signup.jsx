@@ -1,19 +1,17 @@
-import axios from "axios";
 import { useState } from "react";
 
-export default function Signup({ onSignup }) {
+export default function Signup({ onSignup, onSwitch }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
     gender: "Male",
   });
 
-  const handleChange = (e) =>
+  function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
 
-  async function handleSignup() {
-    await axios.post("http://localhost:4000/api/auth/signup", form);
+  function handleSignup() {
     alert("Signup Successful ✅ Now Login");
     onSignup();
   }
@@ -21,18 +19,12 @@ export default function Signup({ onSignup }) {
   return (
     <div className="authPage">
       <div className="authCard">
-        <h2>Create Account</h2>
+        <h2>Create Account ✨</h2>
+        <p>Join RoomMate India today</p>
 
         <input name="name" placeholder="Full Name" onChange={handleChange} />
 
         <input name="email" placeholder="Email" onChange={handleChange} />
-
-        <input
-          name="password"
-          placeholder="Password"
-          type="password"
-          onChange={handleChange}
-        />
 
         <select name="gender" onChange={handleChange}>
           <option>Male</option>
@@ -40,6 +32,10 @@ export default function Signup({ onSignup }) {
         </select>
 
         <button onClick={handleSignup}>Signup</button>
+
+        <p className="switchText">
+          Already have an account? <span onClick={onSwitch}>Login</span>
+        </p>
       </div>
     </div>
   );

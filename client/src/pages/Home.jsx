@@ -1,59 +1,49 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import AIRobot from "../components/AIRobot";
 import RealChat from "../components/RealChat";
-import RobotHelper from "../components/RobotHelper";
+import AddRoom from "./AddRoom";
 
-export default function Home({ user }) {
+export default function Home() {
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
   const [chatMode, setChatMode] = useState("private");
+  const [showAdd, setShowAdd] = useState(false);
 
-  // ✅ Redirect if not logged in
-  if (!localStorage.getItem("token")) {
-    window.location.href = "/";
+  async function loadRooms() {
+    const res = await axios.get("http://localhost:4000/api/rooms");
+    setRooms(res.data);
   }
 
-  // ✅ Fetch rooms from backend
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    axios
-      .get("http://localhost:4000/api/rooms", {
-        headers: { Authorization: token },
-      })
-      .then((res) => setRooms(res.data))
-      .catch((err) => console.log(err));
+    loadRooms();
   }, []);
 
   return (
     <div className="page">
       <h1 className="title">🏠 RoomMate India</h1>
-      <RobotHelper />
-
-      <button
-        className="addRoomBtn"
-        onClick={() => (window.location.href = "/add-room")}
-      >
-        ➕ Post a Room
-      </button>
-
       <p className="subtitle">Find affordable shared rooms across India 🌿</p>
 
-      {/* ✅ CHAT POPUP */}
-      {activeRoom && (
-        <RealChat
-          room={activeRoom}
-          user={user}
-          mode={chatMode}
-          onClose={() => setActiveRoom(null)}
+      {/* Add Room Button */}
+      <button className="addRoomBtn" onClick={() => setShowAdd(true)}>
+        ➕ Add Room
+      </button>
+
+      {/* Add Room Form */}
+      {showAdd && (
+        <AddRoom
+          onRoomAdded={() => {
+            setShowAdd(false);
+            loadRooms();
+          }}
         />
       )}
 
-      {/* ✅ ROOM CARDS */}
+      {/* Rooms */}
       <div className="grid">
         {rooms.map((room) => (
-          <div key={room._id} className="roomCard">
-            <img src={room.image} alt="room" className="roomImage" />
+          <div className="card" key={room._id}>
+            <img src={room.image} alt="room" />
 
             <h2>
               {room.city} - {room.location}
@@ -61,15 +51,10 @@ export default function Home({ user }) {
 
             <p>💰 Rent: ₹{room.rent}/month</p>
             <p>👥 Occupants: {room.occupants}</p>
+            <p>⚡ Split Cost: ₹{Math.floor(room.rent / room.occupants)} each</p>
 
-            <p className="split">
-              Split Cost: ₹{Math.round(room.rent / room.occupants)} each
-            </p>
-
-            {/* ✅ Chat Buttons */}
-            <div className="chatActions">
+            <div className="btnRow">
               <button
-                className="chatBtn"
                 onClick={() => {
                   setActiveRoom(room);
                   setChatMode("private");
@@ -79,7 +64,6 @@ export default function Home({ user }) {
               </button>
 
               <button
-                className="chatBtn group"
                 onClick={() => {
                   setActiveRoom(room);
                   setChatMode("group");
@@ -91,6 +75,18 @@ export default function Home({ user }) {
           </div>
         ))}
       </div>
+
+      {/* Chat Popup */}
+      {activeRoom && (
+        <RealChat
+          room={activeRoom}
+          mode={chatMode}
+          onClose={() => setActiveRoom(null)}
+        />
+      )}
+
+      {/* AI Robot */}
+      <AIRobot />
     </div>
   );
 }

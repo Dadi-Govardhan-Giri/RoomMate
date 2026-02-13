@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-export default function AddRoom() {
+export default function AddRoom({ onRoomAdded }) {
   const [form, setForm] = useState({
     city: "",
     location: "",
@@ -16,7 +16,9 @@ export default function AddRoom() {
 
   async function handleSubmit() {
     await axios.post("http://localhost:4000/api/rooms/add", form);
+
     alert("Room Added Successfully ✅");
+    onRoomAdded();
   }
 
   return (
@@ -28,21 +30,25 @@ export default function AddRoom() {
 
         <input
           name="location"
-          placeholder="Area / Location"
+          placeholder="Exact Location"
           onChange={handleChange}
         />
 
-        <input name="rent" placeholder="Monthly Rent" onChange={handleChange} />
+        <input
+          name="rent"
+          placeholder="Monthly Rent ₹"
+          onChange={handleChange}
+        />
 
         <input
           name="occupants"
-          placeholder="Number of People"
+          placeholder="No of Occupants"
           onChange={handleChange}
         />
 
         <input name="image" placeholder="Image URL" onChange={handleChange} />
 
-        <button onClick={handleSubmit}>Submit Room</button>
+        <button onClick={handleSubmit}>Add Room</button>
       </div>
     </div>
   );

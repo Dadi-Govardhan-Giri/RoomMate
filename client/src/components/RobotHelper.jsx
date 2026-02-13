@@ -1,31 +1,18 @@
-import { useState } from "react";
-
 export default function RobotHelper() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div>
-      {/* Floating Robot Button */}
-      <div className="robotBtn" onClick={() => setOpen(!open)}>
-        🤖
-      </div>
-
-      {/* Popup */}
-      {open && (
-        <div className="robotPopup">
-          <h3>Hi! I'm RoomBot 🤖</h3>
-          <p>Need help finding the best shared room?</p>
-
-          <ul>
-            <li>🏠 Browse available rooms</li>
-            <li>💰 Check split rent cost</li>
-            <li>💬 Chat with owner instantly</li>
-            <li>➕ Add your own room listing</li>
-          </ul>
-
-          <button onClick={() => setOpen(false)}>Close</button>
-        </div>
-      )}
+    <div
+      style={{
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        background: "white",
+        padding: "12px 18px",
+        borderRadius: "15px",
+        boxShadow: "0px 5px 20px rgba(0,0,0,0.3)",
+        fontWeight: "bold",
+      }}
+    >
+      🤖 Need Help?
     </div>
   );
 }
