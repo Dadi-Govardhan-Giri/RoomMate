@@ -1,0 +1,89 @@
+.authContainer {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    background: linear-gradient(to right, #0f172a, #1e293b);
+  }
+  
+  .authCard {
+    width: 420px;
+    padding: 35px;
+    border-radius: 20px;
+  
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+  
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
+  
+    text-align: center;
+  }
+  
+  .authCard h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .tagline {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+  }
+  
+  .authCard h2 {
+    margin-top: 10px;
+    font-size: 1.5rem;
+  }
+  
+  .welcome {
+    margin-bottom: 20px;
+    color: #94a3b8;
+  }
+  
+  .authCard input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+  
+    border-radius: 12px;
+    border: none;
+    outline: none;
+  
+    font-size: 1rem;
+  }
+  
+  .authCard button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+  
+    border: none;
+    border-radius: 12px;
+  
+    background: linear-gradient(to right, #38bdf8, #22c55e);
+    color: white;
+  
+    font-size: 1.1rem;
+    font-weight: bold;
+  
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .authCard button:hover {
+    transform: scale(1.05);
+  }
+  
+  .bottomText {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+  }
+  
+  .linkText {
+    color: #38bdf8;
+    font-weight: bold;
+  }
+  

@@ -1,5 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
+import axios from "axios";
+import "./Auth.css";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -7,73 +8,54 @@ export default function Login({ onLogin }) {
 
   async function handleLogin() {
     try {
-      const res = await axios.post("http://localhost:4000/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:4000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
+      // Save token
       localStorage.setItem("token", res.data.token);
+
+      alert("Login Successful ✅");
       onLogin(res.data.user);
     } catch (err) {
-      alert("Login Failed ❌ Check Email or Password");
+      alert("Login Failed ❌ Check Email/Password");
     }
   }
 
   return (
-    <div className="loginWrapper">
-      {/* LEFT SIDE INFO */}
-      <div className="loginInfo">
+    <div className="authContainer">
+      <div className="authCard">
         <h1>🏠 RoomMate India</h1>
         <p className="tagline">
           Find verified shared rooms & roommates across India 🌿
         </p>
 
-        <div className="featureBox">
-          <h3>🚀 Premium Features</h3>
-
-          <ul>
-            <li>
-              ✅ <b>Real Database Chat Storage</b> <br />
-              Messages are saved securely — no chat loss.
-            </li>
-
-            <li>
-              ✅ <b>Upload Room Images</b> <br />
-              Owners can upload real photos instead of random URLs.
-            </li>
-
-            <li>
-              ✅ <b>Private + Group Chat</b> <br />
-              Talk directly with owners or join room groups.
-            </li>
-
-            <li>
-              ✅ <b>Verified Listings</b> <br />
-              Safe & trusted rooms for students & professionals.
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* RIGHT SIDE LOGIN */}
-      <div className="loginCard">
         <h2>Login</h2>
-        <p>Welcome back 👋</p>
+        <p className="welcome">Welcome back 👋</p>
 
         <input
+          type="email"
           placeholder="Enter Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
-          placeholder="Enter Password"
           type="password"
+          placeholder="Enter Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button onClick={handleLogin}>Login to Continue</button>
+
+        <p className="bottomText">
+          New user? <span className="linkText">Signup coming in Step 5</span>
+        </p>
       </div>
     </div>
   );

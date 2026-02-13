@@ -1,17 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 
-export default function App() {
+function App() {
   const [user, setUser] = useState(null);
+
+  // Auto login if token exists
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) setUser(null);
+  }, []);
 
   return (
     <>
-      {user ? (
-        <Home user={user} />
+      {!user ? (
+        <Login onLogin={(userData) => setUser(userData)} />
       ) : (
-        <Login onLogin={(email) => setUser({ email })} />
+        <Home user={user} />
       )}
     </>
   );
 }
+
+export default App;
