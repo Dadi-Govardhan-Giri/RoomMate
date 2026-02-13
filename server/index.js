@@ -1,62 +1,51 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const dotenv = require("dotenv");
+require("dotenv").config();
 
-dotenv.config();
+const http = require("http");
+const { Server } = require("socket.io");
 
-// ✅ Create app FIRST
+const roomRoutes = require("./routes/rooms");
+const chatRoutes = require("./routes/chat");
+
 const app = express();
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
-const roomRoutes = require("./routes/rooms");
-const authRoutes = require("./routes/auth");
-const chatRoutes = require("./routes/chat");
-
-// Use Routes AFTER app created
+/* Routes */
 app.use("/api/rooms", roomRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 
-// MongoDB Connection
+/* MongoDB */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
   .catch((err) => console.log(err));
 
-// Server Start
-const PORT = process.env.PORT || 4000;
-
-const server = app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT} 🚀`)
-);
-
-// Socket.io Setup
-const { Server } = require("socket.io");
+/* Socket Setup */
+const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
+  cors: { origin: "*" },
 });
 
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
 
-  socket.on("join_group", (roomId) => {
-    socket.join(roomId);
-    console.log("Joined Group Room:", roomId);
+  socket.on("joinRoom", ({ roomId, mode }) => {
+    socket.join(`${roomId}_${mode}`);
+    console.log("Joined:", `${roomId}_${mode}`);
   });
 
-  socket.on("send_group", ({ roomId, message }) => {
-    io.to(roomId).emit("receive_group", message);
+  socket.on("sendMessage", (data) => {
+    io.to(`${data.roomId}_${data.mode}`).emit("receiveMessage", data);
   });
 
   socket.on("disconnect", () => {
     console.log("User Disconnected:", socket.id);
   });
 });
+
+/* Start */
+server.listen(4000, () => console.log("Server running on port 4000 🚀"));

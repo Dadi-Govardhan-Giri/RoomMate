@@ -1,31 +1,63 @@
 const express = require("express");
+const Message = require("../models/Message");
+
 const router = express.Router();
 
-const Message = require("../models/Message");
-const authMiddleware = require("../middleware/authMiddleware");
+/**
+ * GET Chat Messages
+ */
+router.get("/:roomId/:mode", async (req, res) => {
+  const { roomId, mode } = req.params;
 
-// ✅ Get Chat History
-router.get("/:roomId/:type", authMiddleware, async (req, res) => {
-  const { roomId, type } = req.params;
-
-  const messages = await Message.find({ roomId, type }).sort({ createdAt: 1 });
+  const messages = await Message.find({ roomId, mode }).sort({
+    createdAt: 1,
+  });
 
   res.json(messages);
 });
 
-// ✅ Save New Message
-router.post("/", authMiddleware, async (req, res) => {
-  const { roomId, type, text, senderName } = req.body;
+/**
+ * POST Send Message
+ */
+router.post("/send", async (req, res) => {
+  const { roomId, sender, message, mode } = req.body;
 
-  const msg = await Message.create({
+  const newMsg = await Message.create({
     roomId,
-    type,
-    text,
-    senderName,
-    senderId: req.user.id,
+    sender,
+    message,
+    mode,
   });
 
-  res.json(msg);
+  res.json(newMsg);
+});
+
+/**
+ * GET Notification Count
+ */
+router.get("/notifications/:user", async (req, res) => {
+  const user = req.params.user;
+
+  const count = await Message.countDocuments({
+    sender: { $ne: user },
+    seen: false,
+  });
+
+  res.json({ unread: count });
+});
+
+/**
+ * Mark Seen
+ */
+router.put("/seen/:roomId", async (req, res) => {
+  const { roomId } = req.params;
+
+  await Message.updateMany(
+    { roomId, seen: false },
+    { $set: { seen: true } }
+  );
+
+  res.json({ message: "Seen updated" });
 });
 
 module.exports = router;

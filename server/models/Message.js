@@ -2,15 +2,32 @@ const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
   {
-    roomId: { type: mongoose.Schema.Types.ObjectId, ref: "Room" },
+    roomId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Room",
+      required: true,
+    },
 
-    // "private" or "group"
-    type: { type: String, required: true },
+    sender: {
+      type: String,
+      required: true,
+    },
 
-    senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    senderName: String,
+    message: {
+      type: String,
+      required: true,
+    },
 
-    text: String,
+    mode: {
+      type: String,
+      enum: ["private", "group"],
+      default: "private",
+    },
+
+    seen: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

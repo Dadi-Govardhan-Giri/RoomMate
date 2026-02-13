@@ -1,92 +1,124 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import AIRobot from "../components/AIRobot";
 import RealChat from "../components/RealChat";
-import AddRoom from "./AddRoom";
 
-export default function Home() {
+export default function Home({ user }) {
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
+
+  // Filters
+  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("all");
+  const [gender, setGender] = useState("all");
+
+  // Chat mode
   const [chatMode, setChatMode] = useState("private");
-  const [showAdd, setShowAdd] = useState(false);
 
-  async function loadRooms() {
-    const res = await axios.get("http://localhost:4000/api/rooms");
-    setRooms(res.data);
-  }
-
+  // Fetch rooms
   useEffect(() => {
-    loadRooms();
+    axios
+      .get("http://localhost:4000/api/rooms")
+      .then((res) => setRooms(res.data))
+      .catch((err) => console.log("Rooms Error:", err));
   }, []);
 
+  // Filter Logic
+  const filteredRooms = rooms.filter((room) => {
+    const matchesSearch =
+      room.title.toLowerCase().includes(search.toLowerCase()) ||
+      room.city.toLowerCase().includes(search.toLowerCase());
+
+    const matchesCity = city === "all" || room.city === city;
+    const matchesGender = gender === "all" || room.gender === gender;
+
+    return matchesSearch && matchesCity && matchesGender;
+  });
+
   return (
-    <div className="page">
-      <h1 className="title">🏠 RoomMate India</h1>
-      <p className="subtitle">Find affordable shared rooms across India 🌿</p>
+    <div className="homePage">
+      {/* Hero Section */}
+      <div className="hero">
+        <h1>🏠 RoomMate India</h1>
+        <p>Find Verified Shared Rooms Across India 🌿</p>
+      </div>
 
-      {/* Add Room Button */}
-      <button className="addRoomBtn" onClick={() => setShowAdd(true)}>
-        ➕ Add Room
-      </button>
-
-      {/* Add Room Form */}
-      {showAdd && (
-        <AddRoom
-          onRoomAdded={() => {
-            setShowAdd(false);
-            loadRooms();
-          }}
+      {/* Filters */}
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="🔍 Search by city or room..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
-      )}
 
-      {/* Rooms */}
-      <div className="grid">
-        {rooms.map((room) => (
-          <div className="card" key={room._id}>
-            <img src={room.image} alt="room" />
+        <select value={city} onChange={(e) => setCity(e.target.value)}>
+          <option value="all">All Cities</option>
+          <option value="Hyderabad">Hyderabad</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Vizag">Vizag</option>
+          <option value="Delhi">Delhi</option>
+        </select>
 
-            <h2>
-              {room.city} - {room.location}
-            </h2>
+        <select value={gender} onChange={(e) => setGender(e.target.value)}>
+          <option value="all">All</option>
+          <option value="Male">Male Only</option>
+          <option value="Female">Female Only</option>
+        </select>
+      </div>
 
-            <p>💰 Rent: ₹{room.rent}/month</p>
-            <p>👥 Occupants: {room.occupants}</p>
-            <p>⚡ Split Cost: ₹{Math.floor(room.rent / room.occupants)} each</p>
+      {/* Room Grid */}
+      <div className="roomGrid">
+        {filteredRooms.length === 0 ? (
+          <h2 className="noRooms">❌ No rooms available right now</h2>
+        ) : (
+          filteredRooms.map((room) => (
+            <div key={room._id} className="roomCard">
+              <img src={room.image} alt="Room" />
 
-            <div className="btnRow">
-              <button
-                onClick={() => {
-                  setActiveRoom(room);
-                  setChatMode("private");
-                }}
-              >
-                💬 Chat Owner
-              </button>
+              <h2>{room.title}</h2>
+              <p>📍 {room.city}</p>
+              <p>👥 People Living: {room.people}</p>
 
-              <button
-                onClick={() => {
-                  setActiveRoom(room);
-                  setChatMode("group");
-                }}
-              >
-                👥 Group Chat
-              </button>
+              <p className="rent">
+                ₹{room.rent} / month <span>(per person)</span>
+              </p>
+
+              {/* Chat Buttons */}
+              <div className="chatButtons">
+                <button
+                  onClick={() => {
+                    setActiveRoom(room);
+                    setChatMode("private");
+                  }}
+                >
+                  💬 Chat Owner
+                </button>
+
+                <button
+                  className="groupBtn"
+                  onClick={() => {
+                    setActiveRoom(room);
+                    setChatMode("group");
+                  }}
+                >
+                  👥 Group Chat
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Chat Popup */}
       {activeRoom && (
         <RealChat
           room={activeRoom}
+          user={user}
           mode={chatMode}
           onClose={() => setActiveRoom(null)}
         />
       )}
-
-      {/* AI Robot */}
-      <AIRobot />
     </div>
   );
 }
